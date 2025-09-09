@@ -1,0 +1,132 @@
+[
+  {
+    "id": "874ec54a-6d08-488f-af4f-7767c522e729",
+    "name": "Trip",
+    "type": "Expense"
+  },
+  {
+    "id": "8f0798aa-fffb-4927-bbc2-5078c52561f8",
+    "name": "Travel",
+    "type": "Expense"
+  },
+  {
+    "id": "42032e20-9804-4c4d-8552-4fba26bd77d2",
+    "name": "Transportation",
+    "type": "Expense"
+  },
+  {
+    "id": "be1bfbe8-6d34-4c66-ba2c-d3d6104ef45f",
+    "name": "Ticket",
+    "type": "Expense"
+  },
+  {
+    "id": "305ba88b-93ee-406e-b282-87515816458a",
+    "name": "Subscription",
+    "type": "Expense"
+  },
+  {
+    "id": "a680120c-856f-4f74-8a59-532f436b52e0",
+    "name": "Stay",
+    "type": "Expense"
+  },
+  {
+    "id": "a50bb2b2-dabf-4046-a19c-497b256e9cc0",
+    "name": "Sports",
+    "type": "Expense"
+  },
+  {
+    "id": "02588500-b374-4796-920c-1a149423a5d2",
+    "name": "Shopping",
+    "type": "Expense"
+  },
+  {
+    "id": "23752173-ab3a-4fe1-9864-d88d06933acf",
+    "name": "Restaurant",
+    "type": "Expense"
+  },
+  {
+    "id": "a1ee6dad-ce38-4e11-9480-8498db2e2a2e",
+    "name": "Repairs",
+    "type": "Expense"
+  },
+  {
+    "id": "ae596f1a-6ec6-4602-95c6-e6f4caf8ecec",
+    "name": "Personal",
+    "type": "Expense"
+  },
+  {
+    "id": "afd2aec1-329c-485d-a1f1-b854db31d187",
+    "name": "Others",
+    "type": "Expense"
+  },
+  {
+    "id": "0353625b-b5f2-4509-b661-00c23f0b8a05",
+    "name": "Loans",
+    "type": "Expense"
+  },
+  {
+    "id": "f68d564f-d438-4fb0-8280-d36f73899e82",
+    "name": "Insurance",
+    "type": "Expense"
+  },
+  {
+    "id": "22e9cc84-b37c-4fe8-9542-b4c16114b48d",
+    "name": "Home",
+    "type": "Expense"
+  },
+  {
+    "id": "0a53d1df-9063-4a98-8226-6a22a544c6d8",
+    "name": "Health",
+    "type": "Expense"
+  },
+  {
+    "id": "8fe9170a-2437-4230-b790-53205ab70536",
+    "name": "Gifts",
+    "type": "Expense"
+  },
+  {
+    "id": "e995bc58-67ac-4159-ae02-df354621c02b",
+    "name": "General",
+    "type": "Expense"
+  },
+  {
+    "id": "2030593b-cfb6-498c-b265-08db86ad12f5",
+    "name": "Fuel",
+    "type": "Expense"
+  },
+  {
+    "id": "cb504e0f-b5aa-4d43-8a46-362ebc03a940",
+    "name": "Food",
+    "type": "Expense"
+  },
+  {
+    "id": "e9ce15bc-c3df-4bb2-8d78-ad761f9fbb39",
+    "name": "Entertainment",
+    "type": "Expense"
+  },
+  {
+    "id": "d3b58a96-fa47-4547-ba8e-a53d161d0df3",
+    "name": "Drinks",
+    "type": "Expense"
+  },
+  {
+    "id": "3c005a44-846c-43db-8956-94115acdfa23",
+    "name": "Bills",
+    "type": "Expense"
+  },
+  {
+    "id": "ce714324-55e3-427f-b628-36fcaa996e52",
+    "name": "Salary",
+    "type": "Income"
+  },
+  {
+    "id": "c57b992a-0f62-4a46-a600-bde37071e0df",
+    "name": "Freelancing",
+    "type": "Income"
+  },
+  {
+    "id": "7fd859f7-0585-46b0-85a7-cd3edff4b152",
+    "name": "General",
+    "type": "Income"
+  }
+]
