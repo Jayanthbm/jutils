@@ -180,7 +180,7 @@ function getTransactions(db, afterPk) {
     FROM ZTRANSACTION t
     LEFT JOIN ZTRANSACTIONCATEGORY c ON t.ZTRANSACTIONCATEGORY = c.Z_PK
     LEFT JOIN ZPAYEE p ON t.ZPAYEE = p.Z_PK
-    WHERE t.ZISACTIVE = 1 AND t.ZTRANSACTIONACCOUNT = 1
+    WHERE t.ZISACTIVE = 1 AND t.ZTRANSACTIONACCOUNT = 5
   `;
   if (afterPk !== null) {
     query += ` AND t.Z_PK > ?`;
@@ -317,8 +317,6 @@ async function insertTransactions(rows, categoryMap, payeeMap) {
       category_id,
       payee_id,
       type: rawType,
-      category_name: rawCategory || null,
-      payee_name: rawPayee || null,
     });
   }
 

@@ -10,66 +10,7 @@ const TENURE = 180; // Loan tenure in months
 
 const SHEETS = {
   Base: [{ date: "2021-11-09", amount: 40000 }],
-  check_50k: [
-    { date: "2021-11-09", amount: 40000 },
-    { date: "2025-03-09", amount: 50000 },
-  ],
-  check_60k: [
-    { date: "2021-11-09", amount: 40000 },
-    { date: "2025-03-09", amount: 60000 },
-  ],
-  check_70k: [
-    { date: "2021-11-09", amount: 40000 },
-    { date: "2025-03-09", amount: 70000 },
-  ],
-  check_80k: [
-    { date: "2021-11-09", amount: 40000 },
-    { date: "2025-03-09", amount: 80000 },
-  ],
-  check_90k: [
-    { date: "2021-11-09", amount: 40000 },
-    { date: "2025-03-09", amount: 90000 },
-  ],
-  check_100k: [
-    { date: "2021-11-09", amount: 40000 },
-    { date: "2025-03-09", amount: 100000 },
-  ],
-  check_hike_5: [
-    { date: "2021-11-09", amount: 40000 },
-    { date: "2025-04-09", amount: 45000 },
-    { date: "2026-04-09", amount: 50000 },
-    { date: "2027-04-09", amount: 55000 },
-    { date: "2028-04-09", amount: 60000 },
-    { date: "2029-04-09", amount: 65000 },
-    { date: "2030-04-09", amount: 70000 },
-  ],
-  check_hike_10: [
-    { date: "2021-11-09", amount: 40000 },
-    { date: "2025-04-09", amount: 50000 },
-    { date: "2026-04-09", amount: 60000 },
-    { date: "2027-04-09", amount: 70000 },
-    { date: "2028-04-09", amount: 80000 },
-    { date: "2029-04-09", amount: 90000 },
-    { date: "2030-04-09", amount: 100000 },
-  ],
-  check_hike_15: [
-    { date: "2021-11-09", amount: 40000 },
-    { date: "2025-04-09", amount: 55000 },
-    { date: "2026-04-09", amount: 65000 },
-    { date: "2027-04-09", amount: 75000 },
-    { date: "2028-04-09", amount: 85000 },
-    { date: "2029-04-09", amount: 95000 },
-    { date: "2030-04-09", amount: 105000 },
-  ],
-  check_hike_20: [
-    { date: "2021-11-09", amount: 40000 },
-    { date: "2025-04-09", amount: 60000 },
-    { date: "2026-04-09", amount: 70000 },
-    { date: "2027-04-09", amount: 80000 },
-    { date: "2028-04-09", amount: 90000 },
-    { date: "2029-04-09", amount: 100000 },
-    { date: "2030-04-09", amount: 110000 },
-  ],
+  Planned: [{ date: "2021-11-09", amount: 40000 }, { date: "2026-01-09", amount: 50000 }],
 };
 
 const EMI =
@@ -84,7 +25,7 @@ const formatSheet = (worksheet) => {
   worksheet.columns.forEach((column, index) => {
     switch (index) {
       case 0:
-        column.width = 10.8;
+        column.width = 12;
         break;
       case 1:
         column.width = 11.2;
@@ -148,9 +89,8 @@ const formatSheet = (worksheet) => {
 const formatYearsAndMonths = (months) => {
   const years = Math.floor(months / 12);
   const remainingMonths = months % 12;
-  return `${years} year${years !== 1 ? "s" : ""}, ${remainingMonths} month${
-    remainingMonths !== 1 ? "s" : ""
-  }`;
+  return `${years} year${years !== 1 ? "s" : ""}, ${remainingMonths} month${remainingMonths !== 1 ? "s" : ""
+    }`;
 };
 
 const getApplicablePayment = (date, payments) => {
