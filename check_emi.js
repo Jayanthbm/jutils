@@ -10,7 +10,16 @@ const TENURE = 180; // Loan tenure in months
 
 const SHEETS = {
   Base: [{ date: "2021-11-09", amount: 40000 }],
-  Planned: [{ date: "2021-11-09", amount: 40000 }, { date: "2026-01-09", amount: 50000 }],
+  Planned: [
+    { date: "2021-11-09", amount: 40000 },
+    { date: "2026-01-01", amount: 50000 },
+  ],
+  new_plan: [
+    { date: "2021-11-09", amount: 40000 },
+    { date: "2026-01-01", amount: 50000 },
+    { date: "2027-01-01", amount: 60000 },
+    { date: "2028-01-01", amount: 70000 },
+  ],
 };
 
 const EMI =

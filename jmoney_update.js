@@ -277,16 +277,50 @@ async function extractAndInsertPayees(rows) {
   return payeeMap;
 }
 
-async function clearTransactions() {
-  const { error } = await supabase
+async function fetchProductLinksAndClear() {
+  // 1. Fetch existing transactions with product_link
+  const { data: existingLinks, error: fetchErr } = await supabase
+    .from("transactions")
+    .select("category_id, payee_id, amount, product_link")
+    .eq("user_id", USER_ID)
+    .not("product_link", "is", null);
+
+  if (fetchErr) {
+    console.error("❌ Error fetching existing product links:", fetchErr);
+    // Proceeding to clear might lose data, but we'll follow standard flow or throw
+    throw new Error(`❌ Fetching product links: ${fetchErr.message}`);
+  }
+
+  // 2. Create a map: key = "category_id-payee_id-amount" -> product_link
+  const productLinkMap = new Map();
+  if (existingLinks && existingLinks.length > 0) {
+    existingLinks.forEach((tx) => {
+      // Ensure we handle nulls safely for key generation
+      const key = `${tx.category_id || "null"}-${tx.payee_id || "null"}-${tx.amount}`;
+      productLinkMap.set(key, tx.product_link);
+    });
+    console.log(`💾 Preserved ${productLinkMap.size} product links`);
+  }
+
+  // 3. Clear transactions
+  const { error: deleteErr } = await supabase
     .from("transactions")
     .delete()
     .eq("user_id", USER_ID);
-  if (error) throw new Error(`❌ Clearing transactions: ${error.message}`);
+
+  if (deleteErr)
+    throw new Error(`❌ Clearing transactions: ${deleteErr.message}`);
   console.log("🗑️ Cleared all existing transactions");
+
+  return productLinkMap;
 }
 
-async function insertTransactions(rows, categoryMap, payeeMap) {
+async function insertTransactions(
+  rows,
+  categoryMap,
+  payeeMap,
+  productLinkMap = new Map(),
+) {
   const transactions = [];
 
   for (const row of rows) {
@@ -308,6 +342,10 @@ async function insertTransactions(rows, categoryMap, payeeMap) {
       console.warn(`⚠️ Payee not found: "${rawPayee}"`);
     }
 
+    // Generate key to check for preserved product_link
+    const key = `${category_id || "null"}-${payee_id || "null"}-${amount}`;
+    const product_link = productLinkMap.get(key) || null;
+
     transactions.push({
       user_id: USER_ID,
       amount,
@@ -317,6 +355,7 @@ async function insertTransactions(rows, categoryMap, payeeMap) {
       category_id,
       payee_id,
       type: rawType,
+      product_link, // Insert the preserved link
     });
   }
 
@@ -339,36 +378,49 @@ async function run() {
   const startTime = Date.now();
   console.log("🚀 Starting iCloud JMoney sync...");
 
-
   const latestZip = findLatestZip(iCloudFolder);
   if (!latestZip) return;
 
   const localZipPath = copyZipToLocal(latestZip);
 
-  const outputSQLitePath = await unzipAndReturnSQLitePath(localZipPath, localWorkingDir);
+  const outputSQLitePath = await unzipAndReturnSQLitePath(
+    localZipPath,
+    localWorkingDir,
+  );
 
-  console.log("🗄 Opening extracted SQLite file...",outputSQLitePath);
+  console.log("🗄 Opening extracted SQLite file...", outputSQLitePath);
   const db = new Database(outputSQLitePath, { readonly: true });
 
   const payeesFromDB = getPayees(db);
   const categoriesFromDB = getCategories(db);
 
   let lastSyncedPk = loadLastSyncedId();
+  let productLinkMap = new Map();
+
   if (FORCE || lastSyncedPk === null) {
-    console.log("⚡ Force mode: fetching all transactions & clearing table before insert");
-    await clearTransactions();
+    console.log(
+      "⚡ Force mode: fetching all transactions & clearing table before insert",
+    );
+    // Modified to fetch links before clearing
+    productLinkMap = await fetchProductLinksAndClear();
     lastSyncedPk = null;
   } else {
-    console.log(`🔄 Incremental mode: fetching transactions where Z_PK > ${lastSyncedPk}`);
+    console.log(
+      `🔄 Incremental mode: fetching transactions where Z_PK > ${lastSyncedPk}`,
+    );
   }
 
   const transactionsFromDB = getTransactions(db, lastSyncedPk);
-  console.log("📦 Fetched", transactionsFromDB.length, "transactions from SQLite");
+  console.log(
+    "📦 Fetched",
+    transactionsFromDB.length,
+    "transactions from SQLite",
+  );
 
   const categoryMap = await extractAndInsertCategories(categoriesFromDB);
   const payeeMap = await extractAndInsertPayees(payeesFromDB);
 
-  await insertTransactions(transactionsFromDB, categoryMap, payeeMap);
+  await insertTransactions(transactionsFromDB, categoryMap, payeeMap, productLinkMap);
 
   if (transactionsFromDB.length > 0) {
     const maxPk = Math.max(...transactionsFromDB.map(t => t.pk));
