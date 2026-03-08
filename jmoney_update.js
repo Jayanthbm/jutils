@@ -1,3 +1,7 @@
+const dns = require("dns");
+
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
+dns.setDefaultResultOrder("ipv4first");
 require("dotenv").config();
 const { addMinutes } = require("date-fns");
 const { createClient } = require("@supabase/supabase-js");
@@ -15,29 +19,31 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const iCloudFolder = path.resolve(
   process.env.HOME,
-  "Library/Mobile Documents/iCloud~com~duuro~moneyCoachV3/Documents"
+  "Library/Mobile Documents/iCloud~com~duuro~moneyCoachV3/Documents",
 );
 
 const localWorkingDir = path.resolve(__dirname, "jmoney_process");
 
 const args = process.argv.slice(2);
-const FORCE = args.includes('--force');
-const lastSyncedFile = path.join(__dirname, 'last_synced.json');
-
+const FORCE = args.includes("--force");
+const lastSyncedFile = path.join(__dirname, "last_synced.json");
 
 function loadLastSyncedId() {
   if (!fs.existsSync(lastSyncedFile)) return null;
   try {
-    const data = JSON.parse(fs.readFileSync(lastSyncedFile, 'utf-8'));
+    const data = JSON.parse(fs.readFileSync(lastSyncedFile, "utf-8"));
     return data.last_pk ?? null;
   } catch {
-    console.warn('⚠️ Could not read last_synced.json, acting as --force');
+    console.warn("⚠️ Could not read last_synced.json, acting as --force");
     return null;
   }
 }
 
 function saveLastSyncedId(lastPk) {
-  fs.writeFileSync(lastSyncedFile, JSON.stringify({ last_pk: lastPk }, null, 2));
+  fs.writeFileSync(
+    lastSyncedFile,
+    JSON.stringify({ last_pk: lastPk }, null, 2),
+  );
   console.log(`📝 Saved last synced Z_PK: ${lastPk}`);
 }
 
@@ -123,7 +129,6 @@ function unzipAndReturnSQLitePath(zipPath, outputDir) {
   });
 }
 
-
 // Apple CoreData Date Conversion
 const parseAppleDate = (secondsSince2001) => {
   if (!secondsSince2001) return null;
@@ -149,7 +154,7 @@ const cleanDescription = (desc) => {
 function getPayees(db) {
   return db
     .prepare(
-      `SELECT DISTINCT ZNAME AS name FROM ZPAYEE WHERE ZNAME IS NOT NULL AND ZISACTIVE = 1`
+      `SELECT DISTINCT ZNAME AS name FROM ZPAYEE WHERE ZNAME IS NOT NULL AND ZISACTIVE = 1`,
     )
     .all();
 }
@@ -161,7 +166,7 @@ function getCategories(db) {
     SELECT DISTINCT ZCATEGORYNAME AS name, ZCATEGORYTYPE AS type
     FROM ZTRANSACTIONCATEGORY
     WHERE ZCATEGORYNAME IS NOT NULL AND ZISACTIVE = 1
-  `
+  `,
     )
     .all();
 }
@@ -211,9 +216,12 @@ async function extractAndInsertCategories(rows) {
     .eq("user_id", USER_ID);
   if (fetchErr) throw new Error(`❌ Fetching categories: ${fetchErr.message}`);
 
-  const existingSet = new Set(existing.map((c) => `${c.name}|||${c.type}`));
+  const existingSet = new Set(
+    (existing || []).map((c) => `${c.name}|||${c.type}`),
+  );
+
   const newCats = categories.filter(
-    (c) => !existingSet.has(`${c.name}|||${c.type}`)
+    (c) => !existingSet.has(`${c.name}|||${c.type}`),
   );
 
   if (newCats.length > 0) {
@@ -236,8 +244,8 @@ async function extractAndInsertCategories(rows) {
   allCategories.forEach((cat) =>
     categoryMap.set(
       `${cat.name.toLowerCase()}-${cat.type.toLowerCase()}`,
-      cat.id
-    )
+      cat.id,
+    ),
   );
   return categoryMap;
 }
@@ -257,7 +265,8 @@ async function extractAndInsertPayees(rows) {
     .eq("user_id", USER_ID);
   if (fetchErr) throw new Error(`❌ Fetching payees: ${fetchErr.message}`);
 
-  const existingSet = new Set(existing.map((p) => p.name));
+  const existingSet = new Set((existing || []).map((p) => p.name));
+
   const newPayees = payees.filter((p) => !existingSet.has(p));
   if (newPayees.length > 0) {
     const toInsert = newPayees.map((name) => ({ name, user_id: USER_ID }));
@@ -364,7 +373,7 @@ async function insertTransactions(
     return;
   }
 
-  const batchSize = 500;
+  const batchSize = 1000;
   for (let i = 0; i < transactions.length; i += batchSize) {
     const chunk = transactions.slice(i, i + batchSize);
     const { error } = await supabase.from("transactions").insert(chunk);
@@ -374,9 +383,37 @@ async function insertTransactions(
   console.log(`✅ Inserted ${transactions.length} transactions`);
 }
 
+async function ensureSupabaseReachable() {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+      method: "HEAD",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    // Supabase REST normally returns 401 without API key
+    if (![200, 401].includes(res.status)) {
+      throw new Error(`Unexpected response: ${res.status}`);
+    }
+
+    console.log("🌐 Supabase connectivity check passed");
+  } catch (err) {
+    console.error("🚨 Supabase is unreachable. Aborting sync.");
+    console.error(err.message);
+    process.exit(1);
+  }
+}
+
 async function run() {
   const startTime = Date.now();
   console.log("🚀 Starting iCloud JMoney sync...");
+
+  //  Connectivity guard
+  await ensureSupabaseReachable();
 
   const latestZip = findLatestZip(iCloudFolder);
   if (!latestZip) return;
@@ -420,10 +457,15 @@ async function run() {
   const categoryMap = await extractAndInsertCategories(categoriesFromDB);
   const payeeMap = await extractAndInsertPayees(payeesFromDB);
 
-  await insertTransactions(transactionsFromDB, categoryMap, payeeMap, productLinkMap);
+  await insertTransactions(
+    transactionsFromDB,
+    categoryMap,
+    payeeMap,
+    productLinkMap,
+  );
 
   if (transactionsFromDB.length > 0) {
-    const maxPk = Math.max(...transactionsFromDB.map(t => t.pk));
+    const maxPk = Math.max(...transactionsFromDB.map((t) => t.pk));
     saveLastSyncedId(maxPk);
   }
 
