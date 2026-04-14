@@ -36,6 +36,7 @@ function exitWithError(msg, err) {
   process.exit(1);
 }
 
+// ================= SEAT LOGIC =================
 function findContinuousSeats(seats, count) {
   const grouped = {};
 
@@ -44,23 +45,40 @@ function findContinuousSeats(seats, count) {
     grouped[s.row].push(s);
   });
 
-  for (const row in grouped) {
-    const rowSeats = grouped[row].sort((a, b) => a.seat_No - b.seat_No);
+  const sortedRows = Object.keys(grouped).sort(); // lower rows first
 
-    let temp = [rowSeats[0]];
+  let best = null;
+  let bestScore = -Infinity;
 
-    for (let i = 1; i < rowSeats.length; i++) {
-      if (rowSeats[i].seat_No === rowSeats[i - 1].seat_No + 1) {
-        temp.push(rowSeats[i]);
-      } else {
-        temp = [rowSeats[i]];
+  for (const row of sortedRows) {
+    const rowSeats = [...grouped[row]].sort((a, b) => a.seat_No - b.seat_No);
+
+    if (rowSeats.length < count) continue;
+
+    for (let i = 0; i <= rowSeats.length - count; i++) {
+      const group = rowSeats.slice(i, i + count);
+
+      let isContinuous = true;
+      for (let j = 1; j < group.length; j++) {
+        if (group[j].seat_No !== group[j - 1].seat_No + 1) {
+          isContinuous = false;
+          break;
+        }
       }
 
-      if (temp.length === count) return temp;
+      if (!isContinuous) continue;
+
+      const midSeat = group[Math.floor(group.length / 2)].seat_No;
+      const score = midSeat;
+
+      if (score > bestScore) {
+        bestScore = score;
+        best = group;
+      }
     }
   }
 
-  return null;
+  return best;
 }
 
 function findClosestSeats(seats, count) {
@@ -72,22 +90,26 @@ function findClosestSeats(seats, count) {
   });
 
   let best = null;
-  let minGap = Infinity;
+  let bestScore = -Infinity;
 
   for (let i = 0; i <= sorted.length - count; i++) {
     const group = sorted.slice(i, i + count);
 
     let gap = 0;
+
     for (let j = 1; j < group.length; j++) {
       if (group[j].row === group[j - 1].row) {
         gap += Math.abs(group[j].seat_No - group[j - 1].seat_No);
       } else {
-        gap += 100;
+        gap += 1000;
       }
     }
 
-    if (gap < minGap) {
-      minGap = gap;
+    const midSeat = group[Math.floor(group.length / 2)].seat_No;
+    const score = midSeat * 10 - gap;
+
+    if (score > bestScore) {
+      bestScore = score;
       best = group;
     }
   }
@@ -124,7 +146,6 @@ async function start() {
 
     const stands = standRes.data?.result?.stands || [];
 
-    // ❌ EXIT if empty
     if (!stands.length) {
       exitWithError("No available stands");
     }
@@ -157,7 +178,6 @@ async function start() {
         try {
           console.log(`🔍 Checking Stand: ${standId}`);
 
-          // 3️⃣ Seat API
           let seatRes;
           try {
             seatRes = await axios.get(
@@ -186,20 +206,24 @@ async function start() {
 
           if (!selectedSeats) continue;
 
+          console.log(
+            "🪑 Seats:",
+            selectedSeats.map((s) => `${s.row}-${s.seat_No}`).join(", "),
+          );
+
           const payload = {
             eventGroupId: EVENT_GROUP_ID,
             eventId: EVENT_ID,
             standId,
-            qty: ticketsRequired,
+            qty: selectedSeats.length, // ✅ fixed
             seatNos: selectedSeats
               .map((s) => `${s.row}-${s.seat_No}`)
               .join(","),
             seatIds: selectedSeats.map((s) => s.i_Id).join(","),
           };
 
-          console.log("🪑 Trying:", payload);
+          console.log("🪑 Trying payload:", payload);
 
-          // 4️⃣ Cart API
           let cartRes;
           try {
             cartRes = await axios.post(
@@ -222,8 +246,15 @@ async function start() {
 
           console.log("🛒 Response:", cartRes.data);
 
-          console.log("✅ SUCCESS — exiting");
-          process.exit(0);
+          // ✅ SIMPLE SUCCESS CHECK
+          const status = cartRes.data?.status;
+
+          if (status === "Success" || status === "success") {
+            console.log("✅ SUCCESS — exiting");
+            process.exit(0);
+          }
+
+          console.log("⚠️ Not successful, continuing...");
         } catch (err) {
           exitWithError(`Error in stand ${standId}`, err);
         }
