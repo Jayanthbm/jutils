@@ -4,14 +4,14 @@ const semver = require("semver");
 // Your JSON input
 const inputJson = {
   "@react-native-async-storage/async-storage": "^2.2.0",
-  "@react-native-community/netinfo": "^11.4.1",
-  "@react-native-community/slider": "^5.1.1",
+  "@react-native-community/netinfo": "11.5.2",
+  "@react-native-community/slider": "5.1.2",
   "@react-native-vector-icons/common": "^12.4.0",
   "@react-native-vector-icons/material-design-icons": "^12.4.0",
-  "@react-navigation/native": "7.1.26",
-  "@react-navigation/native-stack": "7.9.0",
+  "@react-navigation/native": "7.1.28",
+  "@react-navigation/native-stack": "7.12.0",
   "react-native-safe-area-context": "^5.6.2",
-  "react-native-screens": "4.19.0",
+  "react-native-screens": "4.23.0",
 };
 
 // const inputJson = {
