@@ -2,9 +2,9 @@ const axios = require("axios");
 const readline = require("readline");
 
 // ================= CONFIG =================
-const AUTH_TOKEN ="";
+const AUTH_TOKEN = "";
 
-const EVENT_ID = 3;
+const EVENT_ID = 5;
 const EVENT_GROUP_ID = 1;
 
 const BASE_URL = "https://rcbscaleapi.ticketgenie.in";
@@ -151,9 +151,11 @@ async function start() {
     }
 
     console.log("\n🎟 Available Stands:\n");
-    stands.forEach((s) => {
-      console.log(`${s.stand_Code} - ${s.stand_Name} - ₹${s.price}`);
-    });
+    stands
+      .sort((a, b) => a.price - b.price)
+      .forEach((s) => {
+        console.log(`${s.stand_Code} - ${s.stand_Name} - ₹${s.price}`);
+      });
 
     // 2️⃣ User selection
     const input = await ask("\nEnter stand IDs (comma separated): ");
