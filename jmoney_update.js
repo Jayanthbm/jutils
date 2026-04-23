@@ -181,12 +181,21 @@ function getTransactions(db, afterPk) {
       t.ZTRANSACTIONDATE AS raw_date,
       t.ZTRANSACTIONTYPE AS type,
       IFNULL(c.ZCATEGORYNAME, '') AS category,
-      IFNULL(p.ZNAME, '') AS payee
+      IFNULL(p.ZNAME, '') AS payee,
+      l.ZLATITUDE AS latitude,
+      l.ZLONGITUDE AS longitude
     FROM ZTRANSACTION t
-    LEFT JOIN ZTRANSACTIONCATEGORY c ON t.ZTRANSACTIONCATEGORY = c.Z_PK
-    LEFT JOIN ZPAYEE p ON t.ZPAYEE = p.Z_PK
-    WHERE t.ZISACTIVE = 1 AND t.ZTRANSACTIONACCOUNT = 5
+    LEFT JOIN ZTRANSACTIONCATEGORY c
+      ON t.ZTRANSACTIONCATEGORY = c.Z_PK
+    LEFT JOIN ZPAYEE p
+      ON t.ZPAYEE = p.Z_PK
+    LEFT JOIN ZLOCATION l
+      ON t.ZLOCATION = l.Z_PK
+    WHERE
+      t.ZISACTIVE = 1
+      AND t.ZTRANSACTIONACCOUNT = 5
   `;
+
   if (afterPk !== null) {
     query += ` AND t.Z_PK > ?`;
     return db.prepare(query).all(afterPk);
@@ -364,7 +373,15 @@ async function insertTransactions(
       category_id,
       payee_id,
       type: rawType,
-      product_link, // Insert the preserved link
+      product_link,
+      latitude:
+        row.latitude !== null && row.latitude !== undefined
+          ? parseFloat(row.latitude)
+          : null,
+      longitude:
+        row.longitude !== null && row.longitude !== undefined
+          ? parseFloat(row.longitude)
+          : null,
     });
   }
 
