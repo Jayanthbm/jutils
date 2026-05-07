@@ -8,7 +8,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "exceljs": "^4.4.0",
-    "exiftool-vendored": "^31.1.0",
+    "exiftool-vendored": "^35.19.0",
     "express": "^5.2.1",
     "faker": "^5.5.3",
     "fs-extra": "^11.3.2",
