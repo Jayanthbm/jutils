@@ -5,15 +5,16 @@ const semver = require("semver");
 const inputJson = {
   "@react-native-async-storage/async-storage": "2.2.0",
   "@react-native-community/netinfo": "12.0.1",
-  "@react-native-community/slider": "5.2.0",
-  "@react-native-vector-icons/common": "13.0.1",
-  "@react-native-vector-icons/material-design-icons": "13.1.2",
-  "@react-navigation/native": "7.2.5",
-  "@react-navigation/native-stack": "7.16.0",
-  react: "19.2.3",
-  "react-native": "0.85.3",
-  "react-native-safe-area-context": "5.8.0",
-  "react-native-screens": "4.25.2",
+  "@react-native-community/slider": "5.2.1",
+  "@react-native-vector-icons/common": "13.0.2",
+  "@react-native-vector-icons/material-design-icons": "13.1.3",
+  "@react-navigation/native": "7.3.18",
+  "@react-navigation/native-stack": "7.18.10",
+  "react-native-restart": "0.0.29",
+  "react-native-safe-area-context": "5.9.1",
+  "react-native-screens": "4.27.0",
+  "react-native-sound": "^0.13.0",
+  "react-native-svg": "^15.15.5",
 };
 
 // const inputJson = {

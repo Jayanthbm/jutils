@@ -14,10 +14,11 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const readline = require("readline");
-const { exec } = require("child_process");
+const { exec, execSync } = require("child_process");
 const os = require("os");
 const path = require("path");
 const fs = require("fs");
+
 
 //
 // CONFIG
@@ -70,6 +71,15 @@ function parseDownloadLink(html) {
   });
 
   return downloadLink;
+}
+
+function hasAria2() {
+  try {
+    execSync("aria2c --version", { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function main() {
@@ -148,6 +158,8 @@ async function main() {
 -q \
 -P "${DOWNLOAD_DIRECTORY}" \
 "${finalDownloadLink}"`;
+
+    
 
     const child = exec(wgetCommand);
 
