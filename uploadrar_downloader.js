@@ -151,6 +151,8 @@ async function main() {
 
     console.log("Download started...\n");
 
+    console.log("Link---\n");
+    console.log(finalDownloadLink);
     const wgetCommand = `wget \
 --no-check-certificate \
 --show-progress \
